@@ -460,6 +460,47 @@ app.get("/api/factsheet/hedonova-daily-returns", async (req, res) => {
     res.status(500).send("Internal server error");
   }
 });
+app.get("/api/factsheet/holding-details", async (req, res) => {
+  try {
+    const auth = new google.auth.GoogleAuth({
+      credentials: keys,
+      scopes: ["https://www.googleapis.com/auth/spreadsheets.readonly"],
+    });
+
+    const client = await auth.getClient();
+    const spreadsheetId = "1__uoCp5ZIQKpY2YmhPdpqr5CjOXo-8-3I1nP4MSc_YQ"; // Replace with your own spreadsheet ID
+    const range = "holdings"; // Replace with your own sheet name
+    const response = await sheets.spreadsheets.values.get({
+      auth: client,
+      spreadsheetId,
+      range,
+    });
+
+    const rows = response.data.values;
+    const header = rows[0];
+    const values = rows.slice(1);
+    const result = values.map((row) => {
+      const obj = {};
+      header.forEach((key, i) => {
+        obj[key] = row[i];
+      });
+      return obj;
+    });
+
+    res.json(
+      result.map((el) => ({
+        holdings: el["Holdings"],
+        funds_in_percentage: el["% of funds"],
+        sector: el["Sector"],
+        market_value: el["Market value, $"],
+        type: el["type"],
+      }))
+    );
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Internal server error");
+  }
+});
 
 app.get("/api/portfolio/value-at-risk", async (req, res) => {
   try {
