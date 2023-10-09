@@ -702,6 +702,46 @@ app.get("/api/portfolio/annualized-return", async (req, res) => {
     res.status(500).send("Internal server error");
   }
 });
+app.get("/api/charts/aum", async (req, res) => {
+  try {
+    const auth = new google.auth.GoogleAuth({
+      credentials: keys,
+      scopes: ["https://www.googleapis.com/auth/spreadsheets.readonly"],
+    });
+
+    const client = await auth.getClient();
+    const spreadsheetId = "1Dwowuh90mQnFX04VoN_SerQwQlKtmeRrjiKCjtdQdX8"; // Replace with your own spreadsheet ID
+    const range = "aum"; // Replace with your own sheet name
+    const response = await sheets.spreadsheets.values.get({
+      auth: client,
+      spreadsheetId,
+      range,
+    });
+
+    const rows = response.data.values;
+    const header = rows[0];
+    const values = rows.slice(1);
+    const result = values.map((row) => {
+      const obj = {};
+      header.forEach((key, i) => {
+        obj[key] = row[i];
+      });
+      return obj;
+    });
+
+    res.json(
+      result
+        // .filter((el) => el["60 day rolling correlation"])
+        .map((el) => ({
+          date: el["Date"],
+          aum_in_millions: el["Total AUM (in millions)"],
+        }))
+    );
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Internal server error");
+  }
+});
 // Start the server
 const PORT = process.env.PORT || 3030;
 app.listen(PORT, () => {
