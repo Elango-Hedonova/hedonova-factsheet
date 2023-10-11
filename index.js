@@ -3,6 +3,7 @@ const { google } = require("googleapis");
 const keys = require("./credentials.json"); // Replace with your own credentials file path
 const sheets = google.sheets("v4");
 const app = express();
+const { map } = require("./map");
 require("dotenv").config();
 
 app.get("/", async (req, res) => {
@@ -775,7 +776,7 @@ app.get("/api/charts/coinvestment-comparision", async (req, res) => {
         .map((el) => ({
           date: el["Timeline"],
           coinvestment_pv: el["ci_pv"],
-          hedonova_pv: el["hed_pv"],
+          sp_pv: el["sp_pv"],
         }))
     );
   } catch (error) {
@@ -783,7 +784,14 @@ app.get("/api/charts/coinvestment-comparision", async (req, res) => {
     res.status(500).send("Internal server error");
   }
 });
-app.get;
+app.get("/api/factsheet/map", async (req, res) => {
+  try {
+    res.json(map);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Internal server error");
+  }
+});
 // Start the server
 const PORT = process.env.PORT || 3030;
 app.listen(PORT, () => {
