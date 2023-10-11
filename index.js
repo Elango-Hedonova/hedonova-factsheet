@@ -742,6 +742,48 @@ app.get("/api/charts/aum", async (req, res) => {
     res.status(500).send("Internal server error");
   }
 });
+app.get("/api/charts/coinvestment-comparision", async (req, res) => {
+  try {
+    const auth = new google.auth.GoogleAuth({
+      credentials: keys,
+      scopes: ["https://www.googleapis.com/auth/spreadsheets.readonly"],
+    });
+
+    const client = await auth.getClient();
+    const spreadsheetId = "1__uoCp5ZIQKpY2YmhPdpqr5CjOXo-8-3I1nP4MSc_YQ"; // Replace with your own spreadsheet ID
+    const range = "CI vs Hed"; // Replace with your own sheet name
+    const response = await sheets.spreadsheets.values.get({
+      auth: client,
+      spreadsheetId,
+      range,
+    });
+
+    const rows = response.data.values;
+    const header = rows[0];
+    const values = rows.slice(1);
+    const result = values.map((row) => {
+      const obj = {};
+      header.forEach((key, i) => {
+        obj[key] = row[i];
+      });
+      return obj;
+    });
+
+    res.json(
+      result
+        // .filter((el) => el["60 day rolling correlation"])
+        .map((el) => ({
+          date: el["Timeline"],
+          coinvestment_pv: el["ci_pv"],
+          hedonova_pv: el["hed_pv"],
+        }))
+    );
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Internal server error");
+  }
+});
+app.get;
 // Start the server
 const PORT = process.env.PORT || 3030;
 app.listen(PORT, () => {
