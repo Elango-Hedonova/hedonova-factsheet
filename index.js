@@ -374,13 +374,15 @@ app.get("/api/factsheet/standard-deviation-chart", async (req, res) => {
       return obj;
     });
 
+    console.log(result[0]);
+
     res.json(
       result
-        .filter((el) => el["Hedonova Std Deviation (60 day moving average)"])
+        .filter((el) => el["Hedonova SD"])
         .map((el) => ({
           date: el["date"],
-          hedonova: el["Hedonova Std Deviation (60 day moving average)"],
-          "s&p500": el["S&P 500 Std Deviation (60 day moving average)"],
+          hedonova: el["Hedonova SD"],
+          "s&p500": el["S&P 500 SD"],
         }))
     );
   } catch (error) {
