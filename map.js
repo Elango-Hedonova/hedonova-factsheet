@@ -1,5 +1,7 @@
 const map = {
   US: {
+    continent: "north_america",
+    name: "United States",
     holdings: [
       { name: "Real estate", percentage: "10" },
       { name: "Equipment finance", percentage: "6" },
@@ -7,6 +9,8 @@ const map = {
     ],
   },
   IN: {
+    continent: "asia",
+    name: "India",
     holdings: [
       { name: "Real estate", percentage: "10" },
       { name: "Equipment finance", percentage: "6" },
