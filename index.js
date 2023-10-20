@@ -381,8 +381,7 @@ app.get("/api/factsheet/standard-deviation-chart", async (req, res) => {
         .filter((el) => el["Hedonova SD"])
         .map((el) => ({
           date: el["date"],
-          hedonova: el["Hedonova SD"],
-          "s&p500": el["S&P 500 SD"],
+          hedonova_sd: el["Hedonova SD"],
         }))
     );
   } catch (error) {
