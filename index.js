@@ -743,6 +743,108 @@ app.get("/api/charts/aum", async (req, res) => {
     res.status(500).send("Internal server error");
   }
 });
+app.get("/api/factsheet/nav-change", async (req, res) => {
+  try {
+    const auth = new google.auth.GoogleAuth({
+      credentials: keys,
+      scopes: ["https://www.googleapis.com/auth/spreadsheets.readonly"],
+    });
+
+    const client = await auth.getClient();
+    const spreadsheetId = "1__mppmDmjV_xjscE7OpUo7AXUsrPvQJI84agdc9LtBQ"; // Replace with your own spreadsheet ID
+    const range = "nav"; // Replace with your own sheet name
+    const response = await sheets.spreadsheets.values.get({
+      auth: client,
+      spreadsheetId,
+      range,
+    });
+
+    const rows = response.data.values;
+    const header = rows[0];
+    const values = rows.slice(1);
+    const result = values.map((row) => {
+      const obj = {};
+      header.forEach((key, i) => {
+        obj[key] = row[i];
+      });
+      return obj;
+    });
+
+    const fiveDayArray = result.slice(-5).map((el) => el.nav);
+    const oneMonthArray = result.slice(-30).map((el) => el.nav);
+    const threeMonthArray = result.slice(-90).map((el) => el.nav);
+    const sixMonthArray = result.slice(-180).map((el) => el.nav);
+    const twelveMonthArray = result.slice(-365).map((el) => el.nav);
+    const eighteenMonthArray = result.slice(-545).map((el) => el.nav);
+
+    let fiveDayFirst = fiveDayArray[0] * 1;
+    let fiveDayLast = fiveDayArray[fiveDayArray.length - 1] * 1;
+
+    let oneMonthFirst = oneMonthArray[0] * 1;
+    let oneMonthLast = oneMonthArray[oneMonthArray.length - 1] * 1;
+
+    let threeMonthFirst = threeMonthArray[0] * 1;
+    let threeMonthLast = threeMonthArray[threeMonthArray.length - 1] * 1;
+
+    let sixMonthFirst = sixMonthArray[0] * 1;
+    let sixMonthLast = sixMonthArray[sixMonthArray.length - 1] * 1;
+
+    let twelveMonthFirst = twelveMonthArray[0] * 1;
+    let twelveMonthLast = twelveMonthArray[twelveMonthArray.length - 1] * 1;
+
+    let eighteenMonthFirst = eighteenMonthArray[0] * 1;
+    let eighteenMonthLast =
+      eighteenMonthArray[eighteenMonthArray.length - 1] * 1;
+
+    const navChange = {
+      fiveDays: {
+        amount: (fiveDayLast - fiveDayFirst).toFixed(2) * 1,
+        percentage:
+          (((fiveDayLast - fiveDayFirst) / fiveDayFirst) * 100).toFixed(2) * 1,
+      },
+      oneMonth: {
+        amount: (oneMonthLast - oneMonthFirst).toFixed(2) * 1,
+        percentage:
+          (((oneMonthLast - oneMonthFirst) / oneMonthFirst) * 100).toFixed(2) *
+          1,
+      },
+      threeMonth: {
+        amount: (threeMonthLast - threeMonthFirst).toFixed(2) * 1,
+        percentage:
+          (
+            ((threeMonthLast - threeMonthFirst) / threeMonthFirst) *
+            100
+          ).toFixed(2) * 1,
+      },
+      sixMonth: {
+        amount: (sixMonthLast - sixMonthFirst).toFixed(2) * 1,
+        percentage:
+          (((sixMonthLast - sixMonthFirst) / sixMonthFirst) * 100).toFixed(2) *
+          1,
+      },
+      twelveMonth: {
+        amount: (twelveMonthLast - twelveMonthFirst).toFixed(2) * 1,
+        percentage:
+          (
+            ((twelveMonthLast - twelveMonthFirst) / twelveMonthFirst) *
+            100
+          ).toFixed(2) * 1,
+      },
+      eighteenMonth: {
+        amount: (eighteenMonthLast - eighteenMonthFirst).toFixed(2) * 1,
+        percentage:
+          (
+            ((eighteenMonthLast - eighteenMonthFirst) / eighteenMonthFirst) *
+            100
+          ).toFixed(2) * 1,
+      },
+    };
+    res.json(navChange);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Internal server error");
+  }
+});
 app.get("/api/charts/coinvestment-comparision", async (req, res) => {
   try {
     const auth = new google.auth.GoogleAuth({
