@@ -421,7 +421,7 @@ app.get("/api/factsheet/alpha-chart", async (req, res) => {
         .filter((el) => !isNaN(el["Alpha"]))
         .map((el) => ({
           date: el["date"],
-          alpha: Number(el["Alpha"]),
+          alpha: Number(el["Alpha"]).toFixed(4) * 1,
         }))
     );
   } catch (error) {
