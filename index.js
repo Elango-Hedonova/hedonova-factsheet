@@ -299,7 +299,8 @@ app.get("/api/factsheet/sharpe-chart", async (req, res) => {
         .filter((el) => el["60 day Rolling Sharpe ratio"])
         .map((el) => ({
           date: el["Date"],
-          sharpe_ratio: Number(el["60 day Rolling Sharpe ratio"]),
+          sharpe_ratio:
+            Number(el["60 day Rolling Sharpe ratio"]).toFixed(2) * 1,
         }))
     );
   } catch (error) {
@@ -339,7 +340,7 @@ app.get("/api/factsheet/beta-chart", async (req, res) => {
         .filter((el) => el["14 day moving average"])
         .map((el) => ({
           date: el["date"],
-          average_beta: Number(el["14 day moving average"]),
+          average_beta: Number(el["14 day moving average"]).toFixed(4) * 1,
         }))
     );
   } catch (error) {
@@ -381,7 +382,7 @@ app.get("/api/factsheet/standard-deviation-chart", async (req, res) => {
         .filter((el) => el["Hedonova SD"])
         .map((el) => ({
           date: el["date"],
-          hedonova_sd: el["Hedonova SD"],
+          hedonova_sd: el["Hedonova SD"].replace("%", "") * 1,
         }))
     );
   } catch (error) {
