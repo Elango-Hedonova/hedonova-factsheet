@@ -531,15 +531,50 @@ app.get("/api/portfolio/value-at-risk", async (req, res) => {
       });
       return obj;
     });
+    const filter = req.query.filter ? req.query.filter : "inception";
+    if (filter === "inception") {
+      res.json(
+        result
+          .filter((el) => el["VaR"])
+          .map((el) => ({
+            VaR: el["VaR"],
+            Distribution: el["Percentage Distribution"],
+          }))
+      );
+    }
 
-    res.json(
-      result
-        .filter((el) => el["Sequence"])
-        .map((el) => ({
-          sequence: Number(el["Sequence"]),
-          Distribution: Number(el["Distribution"]),
-        }))
-    );
+    if (filter === "6m") {
+      res.json(
+        result
+          .filter((el) => el["VaR - 6m"])
+          .map((el) => ({
+            VaR: el["VaR - 6m"],
+            Distribution: el["Percentage Distribution - 6m"],
+          }))
+      );
+    }
+
+    if (filter === "12m") {
+      res.json(
+        result
+          .filter((el) => el["VaR - 12m"])
+          .map((el) => ({
+            VaR: el["VaR - 12m"],
+            Distribution: el["Percentage Distribution - 12m"],
+          }))
+      );
+    }
+
+    if (filter === "3y") {
+      res.json(
+        result
+          .filter((el) => el["VaR - 3year"])
+          .map((el) => ({
+            VaR: el["VaR - 3year"],
+            Distribution: el["Percentage Distribution - 3year"],
+          }))
+      );
+    }
   } catch (error) {
     console.error(error);
     res.status(500).send("Internal server error");
