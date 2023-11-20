@@ -580,6 +580,107 @@ app.get("/api/portfolio/value-at-risk", async (req, res) => {
     res.status(500).send("Internal server error");
   }
 });
+app.get("/api/portfolio/information-ratio", async (req, res) => {
+  try {
+    const auth = new google.auth.GoogleAuth({
+      credentials: keys,
+      scopes: ["https://www.googleapis.com/auth/spreadsheets.readonly"],
+    });
+
+    const client = await auth.getClient();
+    const spreadsheetId = "19GRNwJ8_u3UBbIGrxsTtij27FXt6N-JGh1RFlmSRWic"; // Replace with your own spreadsheet ID
+    const range = "Information ratio"; // Replace with your own sheet name
+    const response = await sheets.spreadsheets.values.get({
+      auth: client,
+      spreadsheetId,
+      range,
+    });
+
+    const rows = response.data.values;
+    const header = rows[0];
+    const values = rows.slice(1);
+    const result = values
+      .map((row) => {
+        const obj = {};
+        header.forEach((key, i) => {
+          obj[key] = row[i];
+        });
+        return obj;
+      })
+      .filter((el) => el["day"] === "Sunday");
+    const filter = req.query.filter ? req.query.filter : "inception";
+    if (filter === "inception") {
+      res.json(
+        result.map((el) => ({
+          date: el["date"],
+          informationRatio: el["Information Ratio"] * 1,
+        }))
+      );
+    }
+
+    if (filter === "6m") {
+      res.json(
+        result.slice(-26).map((el) => ({
+          date: el["date"],
+          informationRatio: el["Information Ratio"] * 1,
+        }))
+      );
+    }
+    if (filter === "12m") {
+      res.json(
+        result.slice(-52).map((el) => ({
+          date: el["date"],
+          informationRatio: el["Information Ratio"] * 1,
+        }))
+      );
+    }
+
+    if (filter === "3y") {
+      res.json(
+        result.slice(-156).map((el) => ({
+          date: el["date"],
+          informationRatio: el["Information Ratio"] * 1,
+        }))
+      );
+    }
+
+    // if (filter === "6m") {
+    //   res.json(
+    //     result
+    //       .filter((el) => el["VaR - 6m"])
+    //       .map((el) => ({
+    //         VaR: el["VaR - 6m"],
+    //         Distribution: el["Percentage Distribution - 6m"],
+    //       }))
+    //   );
+    // }
+
+    // if (filter === "12m") {
+    //   res.json(
+    //     result
+    //       .filter((el) => el["VaR - 12m"])
+    //       .map((el) => ({
+    //         VaR: el["VaR - 12m"],
+    //         Distribution: el["Percentage Distribution - 12m"],
+    //       }))
+    //   );
+    // }
+
+    // if (filter === "3y") {
+    //   res.json(
+    //     result
+    //       .filter((el) => el["VaR - 3year"])
+    //       .map((el) => ({
+    //         VaR: el["VaR - 3year"],
+    //         Distribution: el["Percentage Distribution - 3year"],
+    //       }))
+    //   );
+    // }
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Internal server error");
+  }
+});
 app.get("/api/portfolio/tail-risk", async (req, res) => {
   try {
     const auth = new google.auth.GoogleAuth({
