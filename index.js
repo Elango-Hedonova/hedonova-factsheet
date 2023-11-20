@@ -613,7 +613,7 @@ app.get("/api/portfolio/information-ratio", async (req, res) => {
       res.json(
         result.map((el) => ({
           date: el["date"],
-          informationRatio: el["Information Ratio"] * 1,
+          "Information ratio": el["Information Ratio"] * 1,
         }))
       );
     }
@@ -622,7 +622,7 @@ app.get("/api/portfolio/information-ratio", async (req, res) => {
       res.json(
         result.slice(-26).map((el) => ({
           date: el["date"],
-          informationRatio: el["Information Ratio"] * 1,
+          "Information ratio": el["Information Ratio"] * 1,
         }))
       );
     }
@@ -630,7 +630,7 @@ app.get("/api/portfolio/information-ratio", async (req, res) => {
       res.json(
         result.slice(-52).map((el) => ({
           date: el["date"],
-          informationRatio: el["Information Ratio"] * 1,
+          "Information ratio": el["Information Ratio"] * 1,
         }))
       );
     }
@@ -639,7 +639,7 @@ app.get("/api/portfolio/information-ratio", async (req, res) => {
       res.json(
         result.slice(-156).map((el) => ({
           date: el["date"],
-          informationRatio: el["Information Ratio"] * 1,
+          "Information ratio": el["Information Ratio"] * 1,
         }))
       );
     }
