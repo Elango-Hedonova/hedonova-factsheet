@@ -610,7 +610,7 @@ app.get("/api/portfolio/information-ratio", async (req, res) => {
       .filter((el) => el["day"] === "Sunday");
     const filter = req.query.filter ? req.query.filter : "inception";
     if (filter === "inception") {
-      res.json(
+      return res.json(
         result.map((el) => ({
           date: el["date"],
           "Information ratio": el["Information Ratio"] * 1,
@@ -619,7 +619,7 @@ app.get("/api/portfolio/information-ratio", async (req, res) => {
     }
 
     if (filter === "6m") {
-      res.json(
+      return res.json(
         result.slice(-26).map((el) => ({
           date: el["date"],
           "Information ratio": el["Information Ratio"] * 1,
@@ -627,7 +627,7 @@ app.get("/api/portfolio/information-ratio", async (req, res) => {
       );
     }
     if (filter === "12m") {
-      res.json(
+      return res.json(
         result.slice(-52).map((el) => ({
           date: el["date"],
           "Information ratio": el["Information Ratio"] * 1,
@@ -636,46 +636,13 @@ app.get("/api/portfolio/information-ratio", async (req, res) => {
     }
 
     if (filter === "3y") {
-      res.json(
+      return res.json(
         result.slice(-156).map((el) => ({
           date: el["date"],
           "Information ratio": el["Information Ratio"] * 1,
         }))
       );
     }
-
-    // if (filter === "6m") {
-    //   res.json(
-    //     result
-    //       .filter((el) => el["VaR - 6m"])
-    //       .map((el) => ({
-    //         VaR: el["VaR - 6m"],
-    //         Distribution: el["Percentage Distribution - 6m"],
-    //       }))
-    //   );
-    // }
-
-    // if (filter === "12m") {
-    //   res.json(
-    //     result
-    //       .filter((el) => el["VaR - 12m"])
-    //       .map((el) => ({
-    //         VaR: el["VaR - 12m"],
-    //         Distribution: el["Percentage Distribution - 12m"],
-    //       }))
-    //   );
-    // }
-
-    // if (filter === "3y") {
-    //   res.json(
-    //     result
-    //       .filter((el) => el["VaR - 3year"])
-    //       .map((el) => ({
-    //         VaR: el["VaR - 3year"],
-    //         Distribution: el["Percentage Distribution - 3year"],
-    //       }))
-    //   );
-    // }
   } catch (error) {
     console.error(error);
     res.status(500).send("Internal server error");
@@ -708,16 +675,56 @@ app.get("/api/portfolio/tail-risk", async (req, res) => {
       return obj;
     });
 
-    res.json(
-      result
-        .filter((el) => el["Sequence"])
-        .map((el) => ({
-          sequence: el["Sequence"],
-          distribution: el["Distribution"],
-          VaR: el["Var"],
-          CVaR: el["CVAR"],
-        }))
-    );
+    const filter = req.query.filter ? req.query.filter : "inception";
+    if (filter === "inception" || "12m" || "3y") {
+      return res.json(
+        result
+          .filter((el) => el["VaR - inception"])
+          .map((el) => ({
+            VaR: el["VaR - inception"],
+            Distribution: el["Distribution - inception"],
+            "Average Var": el["Average Var - inception"],
+            CVAR: el["CVAR - inception"],
+            "Tail risk": el["tail risk - inception"],
+          }))
+      );
+    }
+
+    if (filter === "6m") {
+      return res.json(
+        result
+          .filter((el) => el["VaR - 6m"])
+          .map((el) => ({
+            VaR: el["VaR - 6m"],
+            Distribution: el["Distribution - 6m"],
+            "Average Var": el["Average Var - 6m"],
+            CVAR: el["CVAR - 6m"],
+            "Tail risk": el["tail risk - 6m"],
+          }))
+      );
+    }
+
+    // if (filter === "12m") {
+    //   res.json(
+    //     result
+    //       .filter((el) => el["VaR - 12m"])
+    //       .map((el) => ({
+    //         VaR: el["VaR - 12m"],
+    //         Distribution: el["Percentage Distribution - 12m"],
+    //       }))
+    //   );
+    // }
+
+    // if (filter === "3y") {
+    //   res.json(
+    //     result
+    //       .filter((el) => el["VaR - 3year"])
+    //       .map((el) => ({
+    //         VaR: el["VaR - 3year"],
+    //         Distribution: el["Percentage Distribution - 3year"],
+    //       }))
+    //   );
+    // }
   } catch (error) {
     console.error(error);
     res.status(500).send("Internal server error");
