@@ -676,19 +676,6 @@ app.get("/api/portfolio/tail-risk", async (req, res) => {
     });
 
     const filter = req.query.filter ? req.query.filter : "inception";
-    if (filter === "inception" || "12m" || "3y") {
-      return res.json(
-        result
-          .filter((el) => el["VaR - inception"])
-          .map((el) => ({
-            VaR: el["VaR - inception"],
-            Distribution: el["Distribution - inception"],
-            "Average Var": el["Average Var - inception"],
-            CVAR: el["CVAR - inception"],
-            "Tail risk": el["tail risk - inception"],
-          }))
-      );
-    }
 
     if (filter === "6m") {
       return res.json(
@@ -700,6 +687,20 @@ app.get("/api/portfolio/tail-risk", async (req, res) => {
             "Average Var": el["Average Var - 6m"],
             CVAR: el["CVAR - 6m"],
             "Tail risk": el["tail risk - 6m"],
+          }))
+      );
+    }
+
+    if (filter === "inception" || "12m" || "3y") {
+      return res.json(
+        result
+          .filter((el) => el["VaR - inception"])
+          .map((el) => ({
+            VaR: el["VaR - inception"],
+            Distribution: el["Distribution - inception"],
+            "Average Var": el["Average Var - inception"],
+            CVAR: el["CVAR - inception"],
+            "Tail risk": el["tail risk - inception"],
           }))
       );
     }
