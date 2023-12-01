@@ -1,11 +1,13 @@
 const express = require("express");
 const { google } = require("googleapis");
 const keys = require("./credentials.json"); // Replace with your own credentials file path
+const cors = require("cors");
 const sheets = google.sheets("v4");
 const app = express();
 const { map } = require("./map");
 require("dotenv").config();
 
+app.use(cors());
 app.get("/", async (req, res) => {
   try {
     res.status(200).json({ text: "fact sheet" });
