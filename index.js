@@ -16,6 +16,14 @@ app.get("/", async (req, res) => {
     res.status(500).send("Internal server error");
   }
 });
+function isLastDayOfMonth(date) {
+  // Create a new date object with the next day
+  const nextDay = new Date(date);
+  nextDay.setDate(date.getDate() + 1);
+
+  // Check if the next day is the 1st day of the next month
+  return nextDay.getMonth() !== date.getMonth();
+}
 // Define the API route to fetch data from the Google Sheet
 app.get("/api/factsheet/header-section", async (req, res) => {
   try {
@@ -299,6 +307,48 @@ app.get("/api/factsheet/sharpe-chart", async (req, res) => {
     res.json(
       result
         .filter((el) => el["60 day Rolling Sharpe ratio"])
+        .map((el) => ({
+          date: el["Date"],
+          sharpe_ratio:
+            Number(el["60 day Rolling Sharpe ratio"]).toFixed(2) * 1,
+        }))
+    );
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Internal server error");
+  }
+});
+app.get("/api/factsheet/sharpe-chart-monthly", async (req, res) => {
+  try {
+    const auth = new google.auth.GoogleAuth({
+      credentials: keys,
+      scopes: ["https://www.googleapis.com/auth/spreadsheets.readonly"],
+    });
+
+    const client = await auth.getClient();
+    const spreadsheetId = "19GRNwJ8_u3UBbIGrxsTtij27FXt6N-JGh1RFlmSRWic"; // Replace with your own spreadsheet ID
+    const range = "Sharpe updated monthly"; // Replace with your own sheet name
+    const response = await sheets.spreadsheets.values.get({
+      auth: client,
+      spreadsheetId,
+      range,
+    });
+
+    const rows = response.data.values;
+    const header = rows[0];
+    const values = rows.slice(1);
+    const result = values.map((row) => {
+      const obj = {};
+      header.forEach((key, i) => {
+        obj[key] = row[i];
+      });
+      return obj;
+    });
+
+    res.json(
+      result
+        .filter((el) => el["60 day Rolling Sharpe ratio"])
+        .filter((el) => isLastDayOfMonth(new Date(el["Date"])))
         .map((el) => ({
           date: el["Date"],
           sharpe_ratio:
