@@ -441,6 +441,48 @@ app.get("/api/factsheet/beta-chart-monthly", async (req, res) => {
     res.status(500).send("Internal server error");
   }
 });
+app.get("/api/factsheet/standard-deviation-chart-old", async (req, res) => {
+  try {
+    const auth = new google.auth.GoogleAuth({
+      credentials: keys,
+      scopes: ["https://www.googleapis.com/auth/spreadsheets.readonly"],
+    });
+
+    const client = await auth.getClient();
+    const spreadsheetId = "19GRNwJ8_u3UBbIGrxsTtij27FXt6N-JGh1RFlmSRWic"; // Replace with your own spreadsheet ID
+    const range = "Standard deviation"; // Replace with your own sheet name
+    const response = await sheets.spreadsheets.values.get({
+      auth: client,
+      spreadsheetId,
+      range,
+    });
+
+    const rows = response.data.values;
+    const header = rows[0];
+    const values = rows.slice(1);
+    const result = values.map((row) => {
+      const obj = {};
+      header.forEach((key, i) => {
+        obj[key] = row[i];
+      });
+      return obj;
+    });
+
+    console.log(result[0]);
+
+    res.json(
+      result
+        .filter((el) => el["Hedonova SD"])
+        .map((el) => ({
+          date: el["date"],
+          hedonova_sd: el["Hedonova SD"].replace("%", "") * 1,
+        }))
+    );
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Internal server error");
+  }
+});
 app.get("/api/factsheet/standard-deviation-chart", async (req, res) => {
   try {
     const auth = new google.auth.GoogleAuth({
@@ -476,7 +518,7 @@ app.get("/api/factsheet/standard-deviation-chart", async (req, res) => {
         .filter((el) => isLastDayOfMonth(new Date(el["date"])))
         .map((el) => ({
           date: el["date"],
-          hedonova_sd: el["SD Hedonova"],
+          hedonova_sd: el["SD Hedonova"].replace("%", "") * 1,
         }))
     );
   } catch (error) {
@@ -527,6 +569,46 @@ app.get("/api/factsheet/standard-deviation-chart-monthly", async (req, res) => {
     res.status(500).send("Internal server error");
   }
 });
+app.get("/api/factsheet/alpha-chart-old", async (req, res) => {
+  try {
+    const auth = new google.auth.GoogleAuth({
+      credentials: keys,
+      scopes: ["https://www.googleapis.com/auth/spreadsheets.readonly"],
+    });
+
+    const client = await auth.getClient();
+    const spreadsheetId = "19GRNwJ8_u3UBbIGrxsTtij27FXt6N-JGh1RFlmSRWic"; // Replace with your own spreadsheet ID
+    const range = "Alpha updated"; // Replace with your own sheet name
+    const response = await sheets.spreadsheets.values.get({
+      auth: client,
+      spreadsheetId,
+      range,
+    });
+
+    const rows = response.data.values;
+    const header = rows[0];
+    const values = rows.slice(1);
+    const result = values.map((row) => {
+      const obj = {};
+      header.forEach((key, i) => {
+        obj[key] = row[i];
+      });
+      return obj;
+    });
+
+    res.json(
+      result
+        .filter((el) => !isNaN(el["Alpha"]))
+        .map((el) => ({
+          date: el["date"],
+          alpha: Number(el["Alpha"]).toFixed(4) * 1,
+        }))
+    );
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Internal server error");
+  }
+});
 app.get("/api/factsheet/alpha-chart", async (req, res) => {
   try {
     const auth = new google.auth.GoogleAuth({
@@ -559,7 +641,7 @@ app.get("/api/factsheet/alpha-chart", async (req, res) => {
         .filter((el) => el["Alpha"])
         .map((el) => ({
           date: el["date"],
-          alpha: el["Alpha"],
+          alpha: el["Alpha"].replace("%", "") * 1,
         }))
     );
   } catch (error) {
