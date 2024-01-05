@@ -286,7 +286,7 @@ app.get("/api/factsheet/sharpe-chart", async (req, res) => {
 
     const client = await auth.getClient();
     const spreadsheetId = "19GRNwJ8_u3UBbIGrxsTtij27FXt6N-JGh1RFlmSRWic"; // Replace with your own spreadsheet ID
-    const range = "Sharpe updated monthly"; // Replace with your own sheet name
+    const range = "Sharpe updated"; // Replace with your own sheet name
     const response = await sheets.spreadsheets.values.get({
       auth: client,
       spreadsheetId,
@@ -307,7 +307,6 @@ app.get("/api/factsheet/sharpe-chart", async (req, res) => {
     res.json(
       result
         .filter((el) => el["60 day Rolling Sharpe ratio"])
-        .filter((el) => isLastDayOfMonth(new Date(el["Date"])))
         .map((el) => ({
           date: el["Date"],
           sharpe_ratio:
@@ -370,7 +369,7 @@ app.get("/api/factsheet/beta-chart", async (req, res) => {
 
     const client = await auth.getClient();
     const spreadsheetId = "19GRNwJ8_u3UBbIGrxsTtij27FXt6N-JGh1RFlmSRWic"; // Replace with your own spreadsheet ID
-    const range = "Beta monthly"; // Replace with your own sheet name
+    const range = "Beta updated"; // Replace with your own sheet name
     const response = await sheets.spreadsheets.values.get({
       auth: client,
       spreadsheetId,
@@ -390,10 +389,10 @@ app.get("/api/factsheet/beta-chart", async (req, res) => {
 
     res.json(
       result
-        .filter((el) => el["Beta"])
+        .filter((el) => el["14 day moving average"])
         .map((el) => ({
           date: el["date"],
-          average_beta: Number(el["Beta"]).toFixed(4) * 1,
+          average_beta: Number(el["14 day moving average"]).toFixed(4) * 1,
         }))
     );
   } catch (error) {
@@ -472,11 +471,10 @@ app.get("/api/factsheet/standard-deviation-chart", async (req, res) => {
 
     res.json(
       result
-        .filter((el) => el["SD Hedonova"])
-        .filter((el) => isLastDayOfMonth(new Date(el["date"])))
+        .filter((el) => el["Hedonova SD"])
         .map((el) => ({
           date: el["date"],
-          hedonova_sd: el["SD Hedonova"],
+          hedonova_sd: el["Hedonova SD"].replace("%", "") * 1,
         }))
     );
   } catch (error) {
@@ -536,7 +534,7 @@ app.get("/api/factsheet/alpha-chart", async (req, res) => {
 
     const client = await auth.getClient();
     const spreadsheetId = "19GRNwJ8_u3UBbIGrxsTtij27FXt6N-JGh1RFlmSRWic"; // Replace with your own spreadsheet ID
-    const range = "Alpha monthly"; // Replace with your own sheet name
+    const range = "Alpha updated"; // Replace with your own sheet name
     const response = await sheets.spreadsheets.values.get({
       auth: client,
       spreadsheetId,
@@ -556,10 +554,10 @@ app.get("/api/factsheet/alpha-chart", async (req, res) => {
 
     res.json(
       result
-        .filter((el) => el["Alpha"])
+        .filter((el) => !isNaN(el["Alpha"]))
         .map((el) => ({
           date: el["date"],
-          alpha: el["Alpha"],
+          alpha: Number(el["Alpha"]).toFixed(4) * 1,
         }))
     );
   } catch (error) {
