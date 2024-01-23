@@ -1339,6 +1339,56 @@ app.get("/api/factsheet/enterprise-value", async (req, res) => {
     res.status(500).send("Internal server error");
   }
 });
+
+app.get("/api/charts/hedvssp500", async (req, res) => {
+  try {
+    const auth = new google.auth.GoogleAuth({
+      credentials: keys,
+      scopes: ["https://www.googleapis.com/auth/spreadsheets.readonly"],
+    });
+
+    const client = await auth.getClient();
+    const spreadsheetId = "1__mppmDmjV_xjscE7OpUo7AXUsrPvQJI84agdc9LtBQ"; // Replace with your own spreadsheet ID
+    const range = "nav"; // Replace with your own sheet name
+    const response = await sheets.spreadsheets.values.get({
+      auth: client,
+      spreadsheetId,
+      range,
+    });
+
+    const rows = response.data.values;
+    const header = rows[0];
+    const values = rows.slice(1);
+    const result = values.map((row) => {
+      const obj = {};
+      header.forEach((key, i) => {
+        obj[key] = row[i];
+      });
+      return obj;
+    });
+
+    const finalResult = result
+      .filter((el) => isLastDayOfMonth(new Date(el["date"])))
+      .map((el) => ({
+        date: el["date"],
+        nav: el["nav"] * 1,
+        sp500: el["sp500"] * 1,
+      }));
+
+    if (!isLastDayOfMonth(new Date(result[result.length - 1].date))) {
+      finalResult.push({
+        date: result[result.length - 1].date,
+        nav: result[result.length - 1].nav * 1,
+        sp500: result[result.length - 1].sp500 * 1,
+      });
+    }
+
+    res.json(finalResult);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Internal server error");
+  }
+});
 // Start the server
 const PORT = process.env.PORT || 3030;
 app.listen(PORT, () => {
