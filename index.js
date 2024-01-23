@@ -388,15 +388,15 @@ app.get("/api/factsheet/beta-chart", async (req, res) => {
       return obj;
     });
 
-    const final = result
+    const finalResult = result
       .filter((el) => el["Beta"])
       .map((el) => ({
         date: el["date"],
         average_beta: Number(el["Beta"]).toFixed(2) * 1,
       }));
-    final.shift();
+    finalResult.shift();
 
-    res.json(final);
+    res.json(finalResult);
   } catch (error) {
     console.error(error);
     res.status(500).send("Internal server error");
@@ -469,8 +469,6 @@ app.get("/api/factsheet/standard-deviation-chart-old", async (req, res) => {
       return obj;
     });
 
-    console.log(result[0]);
-
     res.json(
       result
         .filter((el) => el["Hedonova SD"])
@@ -510,8 +508,6 @@ app.get("/api/factsheet/standard-deviation-chart", async (req, res) => {
       });
       return obj;
     });
-
-    console.log(result[0]);
 
     res.json(
       result
@@ -553,8 +549,6 @@ app.get("/api/factsheet/standard-deviation-chart-monthly", async (req, res) => {
       });
       return obj;
     });
-
-    console.log(result[0]);
 
     res.json(
       result
