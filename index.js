@@ -388,14 +388,15 @@ app.get("/api/factsheet/beta-chart", async (req, res) => {
       return obj;
     });
 
-    res.json(
-      result
-        .filter((el) => el["Beta"])
-        .map((el) => ({
-          date: el["date"],
-          average_beta: Number(el["Beta"]).toFixed(2) * 1,
-        }))
-    );
+    const final = result
+      .filter((el) => el["Beta"])
+      .map((el) => ({
+        date: el["date"],
+        average_beta: Number(el["Beta"]).toFixed(2) * 1,
+      }));
+    final.shift();
+
+    res.json(final);
   } catch (error) {
     console.error(error);
     res.status(500).send("Internal server error");
