@@ -393,7 +393,7 @@ app.get("/api/factsheet/beta-chart", async (req, res) => {
         .filter((el) => el["Beta"])
         .map((el) => ({
           date: el["date"],
-          average_beta: Number(el["Beta"]).toFixed(4) * 1,
+          average_beta: Number(el["Beta"]).toFixed(2) * 1,
         }))
     );
   } catch (error) {
