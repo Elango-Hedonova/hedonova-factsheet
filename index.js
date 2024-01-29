@@ -1383,6 +1383,46 @@ app.get("/api/charts/hedvssp500", async (req, res) => {
     res.status(500).send("Internal server error");
   }
 });
+
+app.get("/api/coinvestment/master-details", async (req, res) => {
+  try {
+    const auth = new google.auth.GoogleAuth({
+      credentials: keys,
+      scopes: ["https://www.googleapis.com/auth/spreadsheets.readonly"],
+    });
+
+    const client = await auth.getClient();
+    const spreadsheetId = "1dmVvwy2BXY-jFKXxLgLOkb_b7pagUmoV709soW-7MK0"; // Replace with your own spreadsheet ID
+    const range = "Master"; // Replace with your own sheet name
+    const response = await sheets.spreadsheets.values.get({
+      auth: client,
+      spreadsheetId,
+      range,
+    });
+
+    const rows = response.data.values;
+    const header = rows[0];
+    const values = rows.slice(1);
+    const result = values.map((row) => {
+      const obj = {};
+      header.forEach((key, i) => {
+        obj[key] = row[i];
+      });
+      return obj;
+    });
+    res.json(
+      result.filter(
+        (el) =>
+          el["Email"] === req.query.email &&
+          el["Co investment"] === req.query.name &&
+          el["Payment status"] === req.query.status
+      )
+    );
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Internal server error");
+  }
+});
 // Start the server
 const PORT = process.env.PORT || 3030;
 app.listen(PORT, () => {
