@@ -1411,12 +1411,17 @@ app.get("/api/coinvestment/master-details", async (req, res) => {
       return obj;
     });
     res.json(
-      result.filter(
-        (el) =>
-          el["Email"] === req.query.email &&
-          el["Co investment"] === req.query.name &&
-          el["Payment status"] === req.query.status
-      )
+      result
+        .filter(
+          (el) =>
+            el["Email"] === req.query.email &&
+            el["Co investment"] === req.query.name &&
+            el["Payment status"] === req.query.status
+        )
+        .map((el) => ({
+          ...el,
+          amount: el["Amount ($)"].replace(/[\$,+]/g, "") * 1,
+        }))
     );
   } catch (error) {
     console.error(error);
