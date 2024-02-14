@@ -1277,8 +1277,8 @@ app.get("/api/charts/coinvestment-comparision", async (req, res) => {
         // .filter((el) => el["60 day rolling correlation"])
         .map((el) => ({
           date: el["Timeline"],
-          coinvestment_pv: el["ci_pv"],
-          sp_pv: el["sp_pv"],
+          coinvestment_pv: el["ci_pv"] * 1,
+          sp_pv: el["sp_pv"] * 1,
         }))
     );
   } catch (error) {
