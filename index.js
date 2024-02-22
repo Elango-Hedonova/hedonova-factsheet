@@ -5,6 +5,7 @@ const cors = require("cors");
 const sheets = google.sheets("v4");
 const app = express();
 const { map } = require("./map");
+const factsheet = require("./factsheet");
 require("dotenv").config();
 
 app.use(cors());
@@ -1641,6 +1642,8 @@ app.get("/api/factsheet/aum", async (req, res) => {
     res.status(500).send("Internal server error");
   }
 });
+
+app.get("/api/factsheet", factsheet);
 
 // Start the server
 const PORT = process.env.PORT || 3030;
