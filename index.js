@@ -1428,6 +1428,220 @@ app.get("/api/coinvestment/master-details", async (req, res) => {
     res.status(500).send("Internal server error");
   }
 });
+// Factsheet optimization
+app.get("/api/factsheet/hedvssp500", async (req, res) => {
+  try {
+    const auth = new google.auth.GoogleAuth({
+      credentials: keys,
+      scopes: ["https://www.googleapis.com/auth/spreadsheets.readonly"],
+    });
+
+    const client = await auth.getClient();
+    const spreadsheetId = "1__mppmDmjV_xjscE7OpUo7AXUsrPvQJI84agdc9LtBQ"; // Replace with your own spreadsheet ID
+    const range = "nav"; // Replace with your own sheet name
+    const response = await sheets.spreadsheets.values.get({
+      auth: client,
+      spreadsheetId,
+      range,
+    });
+
+    const rows = response.data.values;
+    const header = rows[0];
+    const values = rows.slice(1);
+    const result = values.map((row) => {
+      const obj = {};
+      header.forEach((key, i) => {
+        obj[key] = row[i];
+      });
+      return obj;
+    });
+
+    const finalResult = result
+      .filter((el) => isLastDayOfMonth(new Date(el["date"])))
+      .map((el) => ({
+        date: el["date"],
+        nav: el["nav"] * 1,
+        sp500: el["sp500"] * 1,
+      }));
+
+    if (!isLastDayOfMonth(new Date(result[result.length - 1].date))) {
+      finalResult.push({
+        date: result[result.length - 1].date,
+        nav: result[result.length - 1].nav * 1,
+        sp500: result[result.length - 1].sp500 * 1,
+      });
+    }
+
+    res.json(finalResult);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Internal server error");
+  }
+});
+app.get("/api/factsheet/performance-cards", async (req, res) => {
+  try {
+    const auth = new google.auth.GoogleAuth({
+      credentials: keys,
+      scopes: ["https://www.googleapis.com/auth/spreadsheets.readonly"],
+    });
+
+    const client = await auth.getClient();
+    const spreadsheetId = "1__uoCp5ZIQKpY2YmhPdpqr5CjOXo-8-3I1nP4MSc_YQ"; // Replace with your own spreadsheet ID
+    const range = "Sheet1"; // Replace with your own sheet name
+    const response = await sheets.spreadsheets.values.get({
+      auth: client,
+      spreadsheetId,
+      range,
+    });
+
+    const rows = response.data.values;
+    const header = rows[0];
+    const values = rows.slice(1);
+    const result = values.map((row) => {
+      const obj = {};
+      header.forEach((key, i) => {
+        obj[key] = row[i];
+      });
+      return obj;
+    });
+
+    const finalResult = result.map((el) => ({
+      IRR: el["IRR"],
+      "Alpha over S&P500": el["Alpha over S&P500"],
+      CAGR: el["CAGR"],
+    }));
+
+    res.json(finalResult);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Internal server error");
+  }
+});
+app.get("/api/factsheet/monthly-returns", async (req, res) => {
+  try {
+    const auth = new google.auth.GoogleAuth({
+      credentials: keys,
+      scopes: ["https://www.googleapis.com/auth/spreadsheets.readonly"],
+    });
+
+    const client = await auth.getClient();
+    const spreadsheetId = "1lyg-_slZeBW8TJlpH9tPmbLwbWtFPEqMexrozx5iXv4"; // Replace with your own spreadsheet ID
+    const range = "Sheet1"; // Replace with your own sheet name
+    const response = await sheets.spreadsheets.values.get({
+      auth: client,
+      spreadsheetId,
+      range,
+    });
+
+    const rows = response.data.values;
+    const header = rows[0];
+    const values = rows.slice(1);
+    const result = values.map((row) => {
+      const obj = {};
+      header.forEach((key, i) => {
+        obj[key] = row[i];
+      });
+      return obj;
+    });
+
+    const finalResult = result.map((el) => ({
+      month: el["month"],
+      "hedonova monthly returns": el["hedonova monthly returns"],
+      "s&p500 monthly returns": el["s&p500 monthly returns"],
+    }));
+
+    res.json(finalResult);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Internal server error");
+  }
+});
+app.get("/api/factsheet/annualized-return", async (req, res) => {
+  try {
+    const auth = new google.auth.GoogleAuth({
+      credentials: keys,
+      scopes: ["https://www.googleapis.com/auth/spreadsheets.readonly"],
+    });
+
+    const client = await auth.getClient();
+    const spreadsheetId = "19GRNwJ8_u3UBbIGrxsTtij27FXt6N-JGh1RFlmSRWic"; // Replace with your own spreadsheet ID
+    const range = "Annualized return"; // Replace with your own sheet name
+    const response = await sheets.spreadsheets.values.get({
+      auth: client,
+      spreadsheetId,
+      range,
+    });
+
+    const rows = response.data.values;
+    const headers = rows[0];
+    const values = rows[1];
+    const outputObj = {};
+
+    for (let i = 0; i < headers.length; i++) {
+      const header = headers[i];
+      const value = values[i];
+      const properties = header.split(".");
+
+      let currentObj = outputObj;
+      for (let j = 0; j < properties.length - 1; j++) {
+        const property = properties[j];
+        if (!currentObj[property]) {
+          currentObj[property] = {};
+        }
+        currentObj = currentObj[property];
+      }
+
+      const lastProperty = properties[properties.length - 1];
+      currentObj[lastProperty] = value;
+    }
+
+    res.json(outputObj);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Internal server error");
+  }
+});
+app.get("/api/factsheet/aum", async (req, res) => {
+  try {
+    const auth = new google.auth.GoogleAuth({
+      credentials: keys,
+      scopes: ["https://www.googleapis.com/auth/spreadsheets.readonly"],
+    });
+
+    const client = await auth.getClient();
+    const spreadsheetId = "1Dwowuh90mQnFX04VoN_SerQwQlKtmeRrjiKCjtdQdX8"; // Replace with your own spreadsheet ID
+    const range = "aum"; // Replace with your own sheet name
+    const response = await sheets.spreadsheets.values.get({
+      auth: client,
+      spreadsheetId,
+      range,
+    });
+
+    const rows = response.data.values;
+    const header = rows[0];
+    const values = rows.slice(1);
+    const result = values.map((row) => {
+      const obj = {};
+      header.forEach((key, i) => {
+        obj[key] = row[i];
+      });
+      return obj;
+    });
+
+    res.json(
+      result
+        // .filter((el) => el["60 day rolling correlation"])
+        .map((el) => ({
+          date: el["Date"],
+          aum_in_millions: el["Total AUM (in millions)"],
+        }))
+    );
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Internal server error");
+  }
+});
+
 // Start the server
 const PORT = process.env.PORT || 3030;
 app.listen(PORT, () => {
