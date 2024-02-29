@@ -11,6 +11,7 @@ const performance = require("./performance");
 const portfolio = require("./portfolio");
 const brochure = require("./brochure");
 const portfolio_risk_metrics = require("./portfolio-risk-metrics");
+const fetch = require("node-fetch");
 require("dotenv").config();
 
 app.use(cors());
