@@ -6,12 +6,17 @@ const sheets = google.sheets("v4");
 const app = express();
 const { map } = require("./map");
 const factsheet = require("./factsheet");
+const home = require("./home");
+const performance = require("./performance");
+const portfolio = require("./portfolio");
+const brochure = require("./brochure");
+const portfolio_risk_metrics = require("./portfolio-risk-metrics");
 require("dotenv").config();
 
 app.use(cors());
 app.get("/", async (req, res) => {
   try {
-    res.status(200).json({ text: "fact sheet" });
+    res.status(200).json({ status: "healthy" });
   } catch (error) {
     console.error(error);
     res.status(500).send("Internal server error");
@@ -1644,6 +1649,30 @@ app.get("/api/factsheet/aum", async (req, res) => {
 });
 
 app.get("/api/factsheet", factsheet);
+app.get("/api/homepage", home);
+app.get("/api/performance", performance);
+app.get("/api/portfolio", portfolio);
+app.get("/api/brochure", brochure);
+app.get("/api/portfolio_risk_metrics", portfolio_risk_metrics);
+app.get("/api/referral-check/:id", async (req, res) => {
+  try {
+    const response = await fetch(
+      "https://api-live.hedonova.io/api/v2/all-referral-code-list"
+    );
+
+    const result = await response.json();
+    const status =
+      result.data.filter(
+        (el) => el.referralCode === req.params.id.toUpperCase()
+      ).length > 0;
+    return res.json({
+      status,
+      message: status ? "found the referral code" : "not found",
+    });
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
+});
 
 // Start the server
 const PORT = process.env.PORT || 3030;
