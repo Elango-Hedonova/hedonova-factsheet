@@ -81,15 +81,58 @@ async function performance_cards() {
     return error;
   }
 }
+async function inter_asset_correlation() {
+  try {
+    const auth = new google.auth.GoogleAuth({
+      credentials: keys,
+      scopes: ["https://www.googleapis.com/auth/spreadsheets.readonly"],
+    });
 
+    const client = await auth.getClient();
+    const spreadsheetId = "19GRNwJ8_u3UBbIGrxsTtij27FXt6N-JGh1RFlmSRWic"; // Replace with your own spreadsheet ID
+    const range = "Inter asset correlation"; // Replace with your own sheet name
+    const response = await sheets.spreadsheets.values.get({
+      auth: client,
+      spreadsheetId,
+      range,
+    });
+
+    const rows = response.data.values;
+    const header = rows[0];
+    const values = rows.slice(1);
+    const result = values.map((row) => {
+      const obj = {};
+      header.forEach((key, i) => {
+        obj[key] = row[i];
+      });
+      return obj;
+    });
+
+    const finalResult = result.map((el) => ({
+      date: el["date"],
+      value: el["value"] * 1,
+    }));
+
+    return finalResult;
+  } catch (error) {
+    console.error(error);
+    return error;
+  }
+}
 async function performance(req, res) {
-  Promise.all([monthly_returns(), performance_cards()])
+  Promise.all([
+    monthly_returns(),
+    performance_cards(),
+    inter_asset_correlation(),
+  ])
     .then((values) => {
-      const [monthly_returns, performance_cards] = values;
+      const [monthly_returns, performance_cards, inter_asset_correlation] =
+        values;
 
       res.json({
         monthly_returns,
         performance_cards,
+        inter_asset_correlation,
       });
     })
     .catch((err) => {
