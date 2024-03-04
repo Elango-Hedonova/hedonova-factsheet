@@ -2,6 +2,15 @@ const { google } = require("googleapis");
 const sheets = google.sheets("v4");
 const keys = require("./credentials.json");
 
+function isLastDayOfMonth(date) {
+  // Create a new date object with the next day
+  const nextDay = new Date(date);
+  nextDay.setDate(date.getDate() + 1);
+
+  // Check if the next day is the 1st day of the next month
+  return nextDay.getMonth() !== date.getMonth();
+}
+
 async function monthly_returns() {
   try {
     const auth = new google.auth.GoogleAuth({
@@ -119,20 +128,69 @@ async function inter_asset_correlation() {
     return error;
   }
 }
+async function rolling_correlation() {
+  try {
+    const auth = new google.auth.GoogleAuth({
+      credentials: keys,
+      scopes: ["https://www.googleapis.com/auth/spreadsheets.readonly"],
+    });
+
+    const client = await auth.getClient();
+    const spreadsheetId = "19GRNwJ8_u3UBbIGrxsTtij27FXt6N-JGh1RFlmSRWic"; // Replace with your own spreadsheet ID
+    const range = "Rolling correlation - month end email"; // Replace with your own sheet name
+    const response = await sheets.spreadsheets.values.get({
+      auth: client,
+      spreadsheetId,
+      range,
+    });
+
+    const rows = response.data.values;
+    const header = rows[0];
+    const values = rows.slice(1);
+    const result = values.map((row) => {
+      const obj = {};
+      header.forEach((key, i) => {
+        obj[key] = row[i];
+      });
+      return obj;
+    });
+
+    const finalResult = result
+      .filter(
+        (el) =>
+          isLastDayOfMonth(new Date(el.date)) && el["14 day moving average"]
+      )
+      .map((el) => ({
+        date: el["date"],
+        "14 day moving average": el["14 day moving average"] * 1,
+      }));
+
+    return finalResult;
+  } catch (error) {
+    console.error(error);
+    return error;
+  }
+}
 async function performance(req, res) {
   Promise.all([
     monthly_returns(),
     performance_cards(),
     inter_asset_correlation(),
+    rolling_correlation(),
   ])
     .then((values) => {
-      const [monthly_returns, performance_cards, inter_asset_correlation] =
-        values;
+      const [
+        monthly_returns,
+        performance_cards,
+        inter_asset_correlation,
+        rolling_correlation,
+      ] = values;
 
       res.json({
         monthly_returns,
         performance_cards,
         inter_asset_correlation,
+        rolling_correlation,
       });
     })
     .catch((err) => {
