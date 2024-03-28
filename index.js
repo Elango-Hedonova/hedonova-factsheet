@@ -10,8 +10,10 @@ const home = require("./home");
 const performance = require("./performance");
 const portfolio = require("./portfolio");
 const brochure = require("./brochure");
+const q1_2024 = require("./q1_2024");
 const portfolio_risk_metrics = require("./portfolio-risk-metrics");
 const fetch = require("node-fetch");
+const short_fund = require("./short_fund");
 require("dotenv").config();
 
 app.use(cors());
@@ -1674,6 +1676,8 @@ app.get("/api/referral-check/:id", async (req, res) => {
     return res.status(500).json({ error: err.message });
   }
 });
+app.get("/api/quarterly-reports/q1-2024", q1_2024);
+app.get("/api/short-fund", short_fund);
 
 // Start the server
 const PORT = process.env.PORT || 3030;
