@@ -108,11 +108,3 @@ const map = {
 module.exports = {
   map,
 };
-
-// africa
-// asia
-// europe
-// north_america
-// south_america
-// antarctica
-// australia
