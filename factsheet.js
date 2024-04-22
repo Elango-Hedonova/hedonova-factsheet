@@ -661,7 +661,7 @@ async function sharpe_chart() {
       .filter((el) => el["90 day Rolling Sharpe ratio"])
       .map((el) => ({
         date: el["Date"],
-        sharpe_ratio: Number(el["90 day Rolling Sharpe ratio"]).toFixed(2) * 1,
+        sharpe_ratio: Number(el["90 day Rolling Sharpe ratio"]).toFixed(3) * 1,
       }));
   } catch (error) {
     console.error(error);
