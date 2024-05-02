@@ -182,7 +182,7 @@ async function rolling_correlation() {
 
     const client = await auth.getClient();
     const spreadsheetId = "19GRNwJ8_u3UBbIGrxsTtij27FXt6N-JGh1RFlmSRWic"; // Replace with your own spreadsheet ID
-    const range = "Rolling correlation - month end email"; // Replace with your own sheet name
+    const range = "Rolling correlation latest"; // Replace with your own sheet name
     const response = await sheets.spreadsheets.values.get({
       auth: client,
       spreadsheetId,
@@ -201,13 +201,10 @@ async function rolling_correlation() {
     });
 
     const finalResult = result
-      .filter(
-        (el) =>
-          isLastDayOfMonth(new Date(el.date)) && el["14 day moving average"]
-      )
+      .filter((el) => el["monthly average"])
       .map((el) => ({
         date: el["date"],
-        "14 day moving average": el["14 day moving average"] * 1,
+        "14 day moving average": el["monthly average"] * 1,
       }));
 
     return finalResult;
