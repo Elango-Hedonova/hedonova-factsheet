@@ -1119,7 +1119,7 @@ app.get("/api/charts/rolling-correlation", async (req, res) => {
 
     const client = await auth.getClient();
     const spreadsheetId = "19GRNwJ8_u3UBbIGrxsTtij27FXt6N-JGh1RFlmSRWic"; // Replace with your own spreadsheet ID
-    const range = "Rolling correlation - month end email"; // Replace with your own sheet name
+    const range = "Rolling correlation latest"; // Replace with your own sheet name
     const response = await sheets.spreadsheets.values.get({
       auth: client,
       spreadsheetId,
@@ -1139,10 +1139,10 @@ app.get("/api/charts/rolling-correlation", async (req, res) => {
 
     res.json(
       result
-        .filter((el) => el["90 day rolling correlation"])
+        .filter((el) => el["monthly average"])
         .map((el) => ({
           date: el["date"],
-          rolling_correlation: Number(el["90 day rolling correlation"]),
+          rolling_correlation: Number(el["monthly average"]),
         }))
     );
   } catch (error) {
