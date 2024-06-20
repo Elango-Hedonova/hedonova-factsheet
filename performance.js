@@ -260,7 +260,7 @@ async function sharpe_chart() {
 
     const client = await auth.getClient();
     const spreadsheetId = "19GRNwJ8_u3UBbIGrxsTtij27FXt6N-JGh1RFlmSRWic"; // Replace with your own spreadsheet ID
-    const range = "Sharpe updated monthly"; // Replace with your own sheet name
+    const range = "Rolling sharpe latest"; // Replace with your own sheet name
     const response = await sheets.spreadsheets.values.get({
       auth: client,
       spreadsheetId,
@@ -279,11 +279,10 @@ async function sharpe_chart() {
     });
 
     return result
-      .filter((el) => el["60 day Rolling Sharpe ratio"])
-      .filter((el) => isLastDayOfMonth(new Date(el["Date"])))
+      .filter((el) => el["90 day Rolling Sharpe ratio"])
       .map((el) => ({
         date: el["Date"],
-        sharpe_ratio: Number(el["60 day Rolling Sharpe ratio"]).toFixed(2) * 1,
+        sharpe_ratio: Number(el["90 day Rolling Sharpe ratio"]).toFixed(3) * 1,
       }));
   } catch (error) {
     console.error(error);
