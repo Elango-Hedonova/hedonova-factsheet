@@ -278,13 +278,21 @@ async function sharpe_chart() {
       return obj;
     });
 
-    return result
+    const last = result[result.length - 1];
+
+    const finalArr = result
       .filter((el) => el["90 day Rolling Sharpe ratio"])
       .filter((el) => isLastDayOfMonth(new Date(el["Date"])))
       .map((el) => ({
         date: el["Date"],
         sharpe_ratio: Number(el["90 day Rolling Sharpe ratio"]).toFixed(3) * 1,
       }));
+    finalArr.push({
+      date: last["Date"],
+      sharpe_ratio: Number(last["90 day Rolling Sharpe ratio"]).toFixed(3) * 1,
+    });
+
+    return finalArr;
   } catch (error) {
     console.error(error);
     return error;
