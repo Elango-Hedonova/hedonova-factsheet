@@ -280,6 +280,7 @@ async function sharpe_chart() {
 
     return result
       .filter((el) => el["90 day Rolling Sharpe ratio"])
+      .filter((el) => isLastDayOfMonth(new Date(el["Date"])))
       .map((el) => ({
         date: el["Date"],
         sharpe_ratio: Number(el["90 day Rolling Sharpe ratio"]).toFixed(3) * 1,
