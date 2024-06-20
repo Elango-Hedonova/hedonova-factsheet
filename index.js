@@ -362,7 +362,7 @@ app.get("/api/factsheet/sharpe-chart", async (req, res) => {
         .map((el) => ({
           date: el["Date"],
           sharpe_ratio:
-            Number(el["90 day Rolling Sharpe ratio"]).toFixed(2) * 1,
+            Number(el["90 day Rolling Sharpe ratio"]).toFixed(3) * 1,
         }))
     );
   } catch (error) {
